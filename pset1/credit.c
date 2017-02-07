@@ -26,6 +26,7 @@ int main(void) {
     else {
         printf("INVALID\n");
     }
+    return 0;
 }
 
 bool card_check(long long number) {
