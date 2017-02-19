@@ -51,7 +51,7 @@ string getCipher(string text, int num) {
     for (int i = 0, n = strlen(text); i<n; i++) { //Перебираем символы
         if (isalpha(text[i])) { //Если текущий сивол буква
             if (isupper(text[i])) { //Шифруем и оставляем букву большой
-                text[i] = ((text[i] - 'A' + num) % 26)+'A'    
+                text[i] = ((text[i] - 'A' + num) % 26)+'A';    
             }
             else {  //Шифруем и оставляем букву маленькой
                 text[i] = ((text[i] - 'a' + num) % 26)+'a';   
