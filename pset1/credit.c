@@ -28,33 +28,18 @@ void showCardType(int type) {
 }
 
 int getCardType(long long number) {
-    switch (number / 100000000000000) { //Проверяем первые цыфры номера
-        case 3: //AMEX
-            return 1; 
-            break;
-        case 40: //Visa
-        case 41:
-        case 42:
-        case 43:
-        case 44:
-        case 45:
-        case 46: 
-        case 47:
-        case 48:
-        case 49:
-            return 2;
-            break;
-        case 51: //MasterCard
-        case 52:
-        case 53:
-        case 54:
-        case 55:
-            return 3;
-            break;
-        default:
-            return 0;
-            break;
-    }   
+    if (number / 100000000000000 == 3) {
+        return 1; //AMEX
+    }
+    else if (number / 100000000000000 > 39 && number / 100000000000000 < 50) {
+        return 2; //VISA
+    }
+    else if (number / 100000000000000 > 50 && number / 100000000000000 < 56) {
+        return 3; //MASTERCARD
+    }
+    else {
+        return 0; //INVALID
+    }
 }
 
 long long getCardNumber() {
