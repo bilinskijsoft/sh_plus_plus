@@ -5,6 +5,7 @@
 
 bool checkArgs();   //Проверка количества аргументов
 bool isAlphabet();  //Аргумент должен быть только из букв
+void cryptChar();   //Зашифровать символ
 string getText();   //Получить текст
 string getCipher(); //Получить зашифрованный текст
 void printCipheredText();   //Вывести текст
@@ -50,12 +51,7 @@ string getCipher(string text, string key) {
     int j = 0; //Счетчик для ключа
     for (int i=0, n=strlen(text); i < n; i++) { //Перебор символов строки
         if (isalpha(text[i])) { //Если текущий символ строка
-            if (isupper(text[i])) { //Шифрование большой буквы
-                text[i] = ((text[i] - 'A' + (toupper(key[j]) - 'A')) % 26)+'A';    
-            }
-            else {//Шифрование маленькой буквы
-                text[i] = ((text[i] - 'a' + (toupper(key[j]) - 'A')) % 26)+'a';    
-            }
+            cryptChar(&text[i],&key[j]);
             if (j + 1 < strlen(key)) { //Идем к следуюзуй букве ключа
                 j++;
             }
@@ -65,6 +61,15 @@ string getCipher(string text, string key) {
         }
     }
     return text;
+}
+
+void cryptChar(char* inChar, char* key) {
+    if (isupper(*inChar)) { //Шифрование большой буквы
+        *inChar = ((*inChar - 'A' + (toupper(*key) - 'A')) % 26)+'A';    
+    }
+    else {//Шифрование маленькой буквы
+        *inChar = ((*inChar - 'a' + (toupper(*key) - 'A')) % 26)+'a';    
+    }
 }
 
 void printCipheredText(string text) {

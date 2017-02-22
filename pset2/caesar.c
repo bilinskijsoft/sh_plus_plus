@@ -6,11 +6,12 @@
 bool checkArgs();   //Проверка количества аргументов
 bool isNegative();  //ПРоверка аргумента на негативность
 string getText();   //Получить текст
+void encryptChar(); //Зашифровать символ
 string getCipher(); //Получить зашифрованный текст
 void printCipheredText();   //Вывести текст
 
 int main(int argc, string argv[]) {
-    if (!checkArgs(argc)) {
+    if (!checkArgs(&argc)) {
         return 1;
     } 
     if (!isNegative(atoi(argv[1]))) {
@@ -22,8 +23,8 @@ int main(int argc, string argv[]) {
     return 0;
 }
 
-bool checkArgs(int argc) {
-    if (argc == 2) {    //Если количество аргументов 2 тогда все хорошо
+bool checkArgs(int* argc) {
+    if (*argc == 2) {    //Если количество аргументов 2 тогда все хорошо
         return 1;
     }   
     printf("Usage: ./caeser k\n");  //Вывести подсказку
@@ -50,15 +51,19 @@ string getCipher(string text, int num) {
     
     for (int i = 0, n = strlen(text); i<n; i++) { //Перебираем символы
         if (isalpha(text[i])) { //Если текущий сивол буква
-            if (isupper(text[i])) { //Шифруем и оставляем букву большой
-                text[i] = ((text[i] - 'A' + num) % 26)+'A';    
-            }
-            else {  //Шифруем и оставляем букву маленькой
-                text[i] = ((text[i] - 'a' + num) % 26)+'a';   
-            }
+            encryptChar(&text[i], &num);   
         }
     }   
     return text;
+}
+
+void encryptChar(char* inChar, int* key) {
+    if (isupper(*inChar)) { //Шифруем и оставляем букву большой
+        *inChar = ((*inChar - 'A' + *key) % 26)+'A';    
+    }
+    else {  //Шифруем и оставляем букву маленькой
+        *inChar = ((*inChar - 'a' + *key) % 26)+'a';   
+    }
 }
 
 void printCipheredText(string text) {
