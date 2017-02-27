@@ -168,43 +168,23 @@ void greet(void)
  */
 void init(void)
 {
-    srand48((long) time(NULL));
-    int random = 0;
     
+
+    int k=d*d;
     for (int i=0;i<d;i++) {
         for (int j=0;j<d;j++) {
-            board[i][j]=-1;    
+            k--;
+            if (d*d % 2 == 0 && k==2) {
+                board[i][j]=1;    
+            }
+            else if (d*d % 2 == 0 && k==1) {
+                board[i][j]=2;    
+            }
+            else {
+                board[i][j]=k;    
+            }
         }
     }
-    
-    for (int i=0;i<d;i++) {
-        for (int j=0;j<d;j++) {
-            do {
-                random = drand48() * (d*d);
-            } while (isInMassive(random));
-            board[i][j]=random;
-        }
-    }
-    
-    /**
-    * Init for debuging
-    */
-    
-    // int k=d*d;
-    // for (int i=0;i<d;i++) {
-    //     for (int j=0;j<d;j++) {
-    //         k--;
-    //         if (d*d % 2 == 0 && k==2) {
-    //             board[i][j]=1;    
-    //         }
-    //         else if (d*d % 2 == 0 && k==1) {
-    //             board[i][j]=2;    
-    //         }
-    //         else {
-    //             board[i][j]=k;    
-    //         }
-    //     }
-    // }
     
 }
 
