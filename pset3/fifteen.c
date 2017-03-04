@@ -132,9 +132,12 @@ int main(int argc, string argv[])
     return 0;
 }
 
+//Check if num is in tiles massive
 bool isInMassive(int num) {
+    //go thruout massive
     for (int i=0;i<d;i++) {
         for (int j=0;j<d;j++) {
+            //If found target tile return true
             if (board[i][j]==num) {
                 return true;
             }
@@ -170,18 +173,20 @@ void init(void)
 {
     
 
-    int k=d*d;
+    int tileToInsert=d*d;
+    int totalTilesCount=d*d;
     for (int i=0;i<d;i++) {
         for (int j=0;j<d;j++) {
-            k--;
-            if (d*d % 2 == 0 && k==2) {
+            tileToInsert--;
+            //If total count of tiles is odd, we need to swap tiles 1 and 2
+            if (totalTilesCount % 2 == 0 && tileToInsert==2) {
                 board[i][j]=1;    
             }
-            else if (d*d % 2 == 0 && k==1) {
+            else if (totalTilesCount % 2 == 0 && tileToInsert==1) {
                 board[i][j]=2;    
             }
             else {
-                board[i][j]=k;    
+                board[i][j]=tileToInsert;    
             }
         }
     }
@@ -193,10 +198,14 @@ void init(void)
  */
 void draw(void)
 {
+    int totalTilesCount=d*d;
+    
     for(int i=0;i<d;i++) {
         for (int j=0;j<d;j++) {
-            if (d >3) {
-                if (board[i][j]!=d*d) {
+            //If max tile is more than 9, we need to print space befor tiles that less than 10
+            if (d > 3) {
+                //If tile s 0 just print _
+                if (board[i][j]!=0) {
                     if (board[i][j]>9){
                         printf("%d ", board[i][j]);
                     }
@@ -209,6 +218,7 @@ void draw(void)
                 }   
             }
             else {
+                //If tile s 0 just print _
                 if (board[i][j]!=0) {
                     printf("%d ", board[i][j]);
                 }
@@ -227,10 +237,14 @@ void draw(void)
  */
 bool move(int tile)
 {
+    int totalTileCount = d*d;
     int tile_i=-1;
     int tile_j=-1;
+    
+    //Go thruout board
     for (int i=0;i<d;i++) {
         for (int j=0;j<d;j++) {
+            //If found selected tile, store it's i,j to tile_i,tile_j
             if (tile==board[i][j]) {
                 tile_i=i;
                 tile_j=j;
@@ -238,22 +252,27 @@ bool move(int tile)
         }
     }
     
-    if (tile < d*d) {
+    //Chek if selected tile is less than total count of tiles
+    if (tile < totalTileCount) {
+        //Check if left tile is free
         if (board[tile_i-1][tile_j]==0 && tile_i>0) {
             board[tile_i-1][tile_j]=tile;
             board[tile_i][tile_j]=0; 
             return true;
         }
+        //Check if right tile is free
         else if(board[tile_i+1][tile_j]==0 && tile_i<d-1) {
             board[tile_i+1][tile_j]=tile;
             board[tile_i][tile_j]=0; 
             return true;
         }
+        //Check if upper tile is free
         else if(board[tile_i][tile_j-1]==0 && tile_j>0) {
             board[tile_i][tile_j-1]=tile;
             board[tile_i][tile_j]=0;    
             return true;
         }
+        //Check if left icon is free 
         else if(board[tile_i][tile_j+1]==0 && tile_j<d-1) {
             board[tile_i][tile_j+1]=tile;
             board[tile_i][tile_j]=0;    
@@ -269,11 +288,15 @@ bool move(int tile)
  */
 bool won(void)
 {
-    int k=0;
+    int k=0;//Just another counter
+    int totalTileCount = d*d;
+    
+    //Go thruout board
     for (int i=0;i<d;i++) {
         for (int j=0;j<d;j++) {
+            //Checking the right order of tiles
             k++;
-            if (board[i][j]!=k && k<d*d) {
+            if (board[i][j]!=k && k<totalTileCount) {
                 return false;
             }
         }
