@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <cs50.h>
  
 #include "bmp.h"
 
@@ -17,12 +18,11 @@ bool checkParameters(int argc) {
     }   
     return true;
 }
-
  
 int main(int argc, char* argv[])
 {
-    // ensure proper usage
-    if (checkParameters(argc))
+     // ensure proper usage
+    if (!checkParameters(argc))
     {
         return 1;
     }
@@ -59,7 +59,9 @@ int main(int argc, char* argv[])
     fread(&bi, sizeof(BITMAPINFOHEADER), 1, inptr);
  
     // ensure infile is (likely) a 24-bit uncompressed BMP 4.0
-    if (!checkFormat(bf, bi)) {
+    if (bf.bfType != 0x4d42 || bf.bfOffBits != 54 || bi.biSize != 40 || 
+        bi.biBitCount != 24 || bi.biCompression != 0)
+    {
         fclose(outptr);
         fclose(inptr);
         fprintf(stderr, "Unsupported file format.\n");
@@ -69,7 +71,7 @@ int main(int argc, char* argv[])
     // determine padding for scanlines (for the image we are reading from)
     int padding =  (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
     
-    // temporary image
+    // Create temporary image
     RGBTRIPLE image[bi.biWidth][abs(bi.biHeight)];
     
   
@@ -78,19 +80,26 @@ int main(int argc, char* argv[])
         for (int j = 0; j < bi.biWidth; j++)
         {
             RGBTRIPLE triple;
+            // zchituu color
             fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
+            // brocau v masiv
             image[j][i] = triple;
         }
         // poisk v file
         fseek(inptr, padding, SEEK_CUR);
     }
     
-    //Change size of image in header
-    bi.biWidth = bi.biWidth * mashtab;
-    bi.biHeight =bi.biHeight* mashtab;
+    // zmenhut v k raz vusotu i hirinu
+    bi.biWidth = bi.biWidth * scale;
+    bi.biHeight =bi.biHeight* scale;
+    
     // recalculate the padding (for the sclaed image we are writing)
     padding = (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
+    
+    // poschet nomera bayt 
     bi.biSizeImage = abs(bi.biHeight) * (bi.biWidth * sizeof(RGBTRIPLE) + padding);
+    
+    // calculate the total number of bytes in the image (with the headers)
     bf.bfSize = bi.biSizeImage + 54;
     
     // write outfile's BITMAPFILEHEADER
@@ -106,12 +115,14 @@ int main(int argc, char* argv[])
         {
             // temporary storage
             RGBTRIPLE triple;
-            triple = image[(int) (j / mashtab)][(int) (i / mashtab)];
-            // write the pixel to the file
+            
+            // select needed pixel from temp image
+            triple = image[(int) (j / scale)][(int) (i / scale)];
+            //put it to file
             fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr); 
         }
         
-        // write яzero bytes
+        // write the buffer
         for (int k = 0; k < padding; k++)
         {
             fputc(0x00, outptr);
@@ -123,6 +134,7 @@ int main(int argc, char* argv[])
  
     // close outfile
     fclose(outptr);
-
+ 
+    // that's all folks
     return 0;
 }
