@@ -80,23 +80,20 @@ int main(int argc, char* argv[])
         for (int j = 0; j < bi.biWidth; j++)
         {
             RGBTRIPLE triple;
-            // zchituu color
             fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
-            // brocau v masiv
             image[j][i] = triple;
         }
-        // poisk v file
         fseek(inptr, padding, SEEK_CUR);
     }
     
-    // zmenhut v k raz vusotu i hirinu
+    // crate header
     bi.biWidth = bi.biWidth * scale;
     bi.biHeight =bi.biHeight* scale;
     
     // recalculate the padding (for the sclaed image we are writing)
     padding = (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
     
-    // poschet nomera bayt 
+    // calculate size
     bi.biSizeImage = abs(bi.biHeight) * (bi.biWidth * sizeof(RGBTRIPLE) + padding);
     
     // calculate the total number of bytes in the image (with the headers)
