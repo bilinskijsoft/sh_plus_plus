@@ -103,7 +103,7 @@ func main() {
 
 	go loadDictionary("large.txt", ch)
 	<-ch
-	go loadFileForCheck("book.txt",misspelledWordsArray, ch)
+	go loadFileForCheck(getFileNameToCheck(),misspelledWordsArray, ch)
 	fmt.Println("Checking... Please wait.")
 	<-ch
 	showResults(misspelledWordsArray,wordsInDictionary,misspelledWords,wordsInText)
