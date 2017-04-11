@@ -74,6 +74,7 @@ func showResults(misspelledWordsArray *list.List, totalWords int, misspelledWord
 }
 
 func loadFileForCheck(fileName string, wordsArray *list.List,ch chan string) {
+	<-ch
 	file, err := os.Open(fileName)
 	if err != nil {
 		log.Fatal(err)
@@ -102,7 +103,6 @@ func main() {
 	misspelledWordsArray := list.New()
 
 	go loadDictionary("large.txt", ch)
-	<-ch
 	go loadFileForCheck(getFileNameToCheck(),misspelledWordsArray, ch)
 	fmt.Println("Checking... Please wait.")
 	<-ch
