@@ -24,11 +24,9 @@ func getHash(s string) string {
 }
 
 func isInDictionary(word string) bool {
-	if _, ok := hashMap[getHash(word)]; ok {
-		return true
-	}
+	wordFromHash,_ := hashMap[getHash(word)]
 
-	return  false
+	return wordFromHash = word
 }
 
 func loadDictionary(dictionary string, ch chan string){
