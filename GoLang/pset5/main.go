@@ -2,57 +2,19 @@ package main
 
 import (
 	"fmt"
-	"crypto/sha1"
+	"regexp"
+	"io/ioutil"
+	"strings"
 	"os"
-	"log"
-	"bufio"
-	"container/list"
+	"strconv"
+	"sync"
 )
 
 var (
-	hashMap = make(map[string]string)
-	wordsInDictionary int
-	wordsInText int
-	misspelledWords int
+	wordsInDictionary int = 0
+	wordsInText int = 0
+	misspells int = 0
 )
-
-func getHash(s string) string {
-	h := sha1.New()
-	h.Write([]byte(s))
-	bs := h.Sum([]byte{})
-	return string(bs)
-}
-
-func isInDictionary(word string) bool {
-	wordFromHash,_ := hashMap[getHash(word)]
-
-	return wordFromHash = word
-}
-
-func loadDictionary(dictionary string, ch chan string){
-	// Open file for reading
-	file, err := os.Open(dictionary)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-
-	for scanner.Scan() {
-		wordsInDictionary++
-		hashMap[getHash(scanner.Text())] = scanner.Text()
-	}
-
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-		return
-	}
-	ch <-""
-	return
-}
 
 func getFileNameToCheck() string {
 	fileName := ""
@@ -62,47 +24,77 @@ func getFileNameToCheck() string {
 	return fileName
 }
 
-func showResults(misspelledWordsArray *list.List, totalWords int, misspelledWords int, wordsInText int) {
-	for e := misspelledWordsArray.Front(); e != nil; e = e.Next() {
-		fmt.Println(e.Value)
-	}
-	fmt.Println("\nWORDS IN DICTIONARY: ", totalWords)
-	fmt.Println("WORDS MISSPELLED: ", misspelledWords)
-	fmt.Println("WORDS IN TEXT: ", wordsInText)
+func showResults(totalWords int, misspelledWords int, wordsInText int) {
+	log("WORDS IN DICTIONARY: " + strconv.Itoa(totalWords))
+	log("WORDS MISSPELLED: " + strconv.Itoa(misspelledWords))
+	log("WORDS IN TEXT: " + strconv.Itoa(wordsInText))
 }
 
-func loadFileForCheck(fileName string, wordsArray *list.List,ch chan string) {
-	<-ch
-	file, err := os.Open(fileName)
+func loadFile(fileName string) string {
+	bs, err := ioutil.ReadFile(fileName)
+
 	if err != nil {
-		log.Fatal(err)
+		return ""
+	}
+
+	return string(bs)
+}
+
+func checkText(text string, dictionary string, wg *sync.WaitGroup) {
+	log("Checking... Please wait...")
+	wordsInDictionary = strings.Count(dictionary, "\n")
+	ch := make(chan string,10)
+
+	re := regexp.MustCompile("([a-zA-Z\\'])+")
+	words := re.FindAllString(text, -1)
+
+	go logMisspellings(ch)
+
+	for _,value := range words {
+		wordsInText++
+		wg.Add(1)
+		go checkWord(value, dictionary, ch, wg)
+	}
+
+}
+
+func checkWord(word string, dictionary string, ch chan string, wg *sync.WaitGroup) {
+	re := regexp.MustCompile(strings.ToLower(word + "\\n"))
+
+	if re.MatchString(dictionary) == false {
+		ch <- word
+	}
+
+	wg.Done()
+}
+
+func logMisspellings(ch chan string) {
+	os.Remove("misspellings.txt")
+	file, err := os.Create("misspellings.txt")
+
+	if err != nil {
+		// handle the error here
 		return
 	}
 
 	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
-	scanner.Split(bufio.ScanWords)
-
-	for scanner.Scan() {
-		wordsInText++
-		if !isInDictionary(scanner.Text()) {
-			misspelledWords++
-			wordsArray.PushBack(scanner.Text())
-		}
+	for {
+		word := <- ch
+		file.WriteString(word + "\n")
+		misspells++
 	}
-	ch <- ""
 }
 
+func log(text string) {
+	fmt.Println("[LOG]: ", text)
+}
 
 func main() {
-	var ch chan string = make(chan string)
+	wg := sync.WaitGroup{}
+	log("Misspellings will be writen to file 'misspellings.txt'")
+	checkText(loadFile(getFileNameToCheck()),loadFile("large.txt"), &wg)
 
-	misspelledWordsArray := list.New()
-
-	go loadDictionary("large.txt", ch)
-	go loadFileForCheck(getFileNameToCheck(),misspelledWordsArray, ch)
-	fmt.Println("Checking... Please wait.")
-	<-ch
-	showResults(misspelledWordsArray,wordsInDictionary,misspelledWords,wordsInText)
+	wg.Wait()
+	showResults(wordsInDictionary,misspells,wordsInText)
 }
